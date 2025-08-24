@@ -1,20 +1,20 @@
 # tgVaultApi
 
-API .NET 9 para gestionar sesiones de cuentas de Telegram (WTelegramClient), autenticación JWT, y eventos en tiempo real (SignalR).
+API .NET 9 para gestionar sesiones de cuentas de Telegram (WTelegramClient), autenticaciÃ³n JWT, y eventos en tiempo real (SignalR).
 
-## Características
+## CaracterÃ­sticas
 - .NET 9 Web API con Swagger (UI en /swagger).
-- Autenticación JWT por usuario/contraseña.
+- AutenticaciÃ³n JWT por usuario/contraseÃ±a.
 - Usuario admin hardcoded en appsettings (solo para desarrollo) con permiso para crear usuarios.
-- Login de cuentas de Telegram en 2 pasos (teléfono [+ password 2FA] + código enviado por 777000).
+- Login de cuentas de Telegram en 2 pasos (telÃ©fono [+ password 2FA] + cÃ³digo enviado por 777000).
 - Sesiones de Telegram persistidas como archivos .session (carpeta configurable).
-- SignalR para emitir en tiempo real el código recibido (chat 777000).
+- SignalR para emitir en tiempo real el cÃ³digo recibido (chat 777000).
 - SQLite para usuarios de la API (app.db).
 
 ## Requisitos
 - .NET SDK 9
 
-## Configuración (appsettings.json)
+## ConfiguraciÃ³n (appsettings.json)
 - Jwt
   - Key, Issuer, Audience, ExpireMinutes
 - Telegram
@@ -23,7 +23,7 @@ API .NET 9 para gestionar sesiones de cuentas de Telegram (WTelegramClient), aut
   - SessionDir: carpeta para archivos .session
 - Admin
   - Username: usuario admin hardcoded
-  - Password: contraseña admin hardcoded
+  - Password: contraseÃ±a admin hardcoded
 - Server
   - Port: puerto HTTP a exponer (ej. 5080)
 - ConnectionStrings
@@ -40,7 +40,7 @@ Ejemplo:
 }
 ```
 
-## Ejecución
+## EjecuciÃ³n
 ```bash
 # desde la carpeta del proyecto
  dotnet run
@@ -49,7 +49,7 @@ La API se expone en: http://0.0.0.0:<Server:Port> (por defecto 5080). Swagger: h
 
 Al iniciar, se aplican migraciones a SQLite (crea/actualiza app.db).
 
-## Autenticación
+## AutenticaciÃ³n
 1) Obtener JWT (admin o usuario creado por admin)
 - POST /api/users/login
   - Body: { "username": "admin", "password": "Admin123!" }
@@ -64,7 +64,7 @@ Usuarios (API)
   - Respuesta: { access_token: string, token_type: "Bearer", expires_in: number }
 - POST /api/users (requiere JWT de admin)
   - Body: { username: string, password: string }
-  - Crea un usuario que podrá autenticarse y acceder a las cuentas TG.
+  - Crea un usuario que podrÃ¡ autenticarse y acceder a las cuentas TG.
 
 Telegram
 - POST /api/telegram/login/start (JWT requerido)
@@ -77,17 +77,17 @@ Telegram
   - Respuesta: TelegramAccountInfo[]
 
 Notas sobre sesiones y persistencia de TG
-- WTelegramClient guarda las sesiones por teléfono en Telegram.SessionDir como archivos .session.
+- WTelegramClient guarda las sesiones por telÃ©fono en Telegram.SessionDir como archivos .session.
 - La lista de cuentas devueltas refleja las sesiones activas (en memoria) del proceso.
-- La base SQLite persiste usuarios de la API. Si deseas persistir también TelegramAccountInfo en DB, puede añadirse fácilmente.
+- La base SQLite persiste usuarios de la API. Si deseas persistir tambiÃ©n TelegramAccountInfo en DB, puede aÃ±adirse fÃ¡cilmente.
 
 ## SignalR (tiempo real)
 - Hub: /hubs/updates
-- Autenticación: pasar access_token={JWT} en querystring o Authorization: Bearer en el WebSocket.
+- AutenticaciÃ³n: pasar access_token={JWT} en querystring o Authorization: Bearer en el WebSocket.
 - Server-to-client methods:
   - LoginCodeReceived(payload)
     - payload: { account: string, code: string, receivedAt: string ISO-8601 }
-- El evento se emite cuando llega un mensaje del sistema (chat 777000) con el código de login.
+- El evento se emite cuando llega un mensaje del sistema (chat 777000) con el cÃ³digo de login.
 
 ## Ejemplos
 
@@ -106,7 +106,7 @@ curl -s -X POST http://localhost:5080/api/telegram/login/start \
   -d '{"phoneNumber":"+5491122334455"}'
 ```
 
-Completar login con código:
+Completar login con cÃ³digo:
 ```bash
 curl -s -X POST http://localhost:5080/api/telegram/login/submit-code \
   -H "Authorization: Bearer <TOKEN>" \
@@ -120,7 +120,7 @@ curl -s http://localhost:5080/api/telegram/accounts \
   -H "Authorization: Bearer <TOKEN>"
 ```
 
-Conexión a SignalR (JS ejemplo mínimo):
+ConexiÃ³n a SignalR (JS ejemplo mÃ­nimo):
 ```js
 const connection = new signalR.HubConnectionBuilder()
   .withUrl("http://localhost:5080/hubs/updates?access_token=TOKEN")
@@ -133,7 +133,3 @@ connection.on("LoginCodeReceived", (payload) => {
 await connection.start();
 ```
 
-## Seguridad
-- Cambia la clave JWT en appsettings para producción.
-- No expongas ApiId/ApiHash públicamente.
-- Admin hardcoded es solo para desarrollo; reemplázalo por un flujo seguro en producción.
